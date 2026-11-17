@@ -1,0 +1,557 @@
+# Git & GitHub Practical: Malaria Surveillance Analysis
+
+## Overview
+
+This repository is a practical exercise for learning and applying **Git and GitHub in an RStudio-based research workflow**.
+
+The project uses a small synthetic malaria surveillance dataset containing weekly malaria cases and rainfall measurements. The data is simulated for training purposes and does not represent real patients, locations, or surveillance records.
+
+The practical focuses on collaborative research workflows, including:
+
+- Working with a Git repository from RStudio
+- Creating branches
+- Making and tracking changes
+- Committing work
+- Pushing changes to GitHub
+- Collaborating through pull requests
+- Reviewing and merging contributions
+- Pulling updates from the shared repository
+
+---
+
+## Project Scenario
+
+A malaria surveillance team has collected weekly observations over a 24-week period.
+
+The dataset contains:
+
+| Variable | Description |
+|---|---|
+| `week` | Week of observation |
+| `rainfall_mm` | Weekly rainfall in millimetres |
+| `malaria_cases` | Simulated number of reported malaria cases |
+
+The dataset is designed to provide a simple research context for practicing Git and GitHub collaboration.
+
+### Important
+
+The dataset is **synthetic** and is intended only for this practical exercise. The relationships between rainfall and malaria cases should not be interpreted as real epidemiological findings.
+
+---
+
+# Project Structure
+
+The repository will contain the following structure:
+
+```text
+malaria-git-practical/
+│
+├── README.md
+├── generate_data.R
+├── malaria_data.csv
+│
+└── analysis/
+    ├── pair1_trends.R
+    ├── pair2_rainfall.R
+    ├── pair3_risk.R
+    └── pair4_moving_average.R
+```
+
+---
+
+# Dataset Generation
+
+The synthetic dataset can be generated using `generate_data.R`.
+
+```r
+# Synthetic Malaria Surveillance Data
+
+set.seed(42)
+
+week <- 1:24
+
+rainfall <- round(pmax(0,
+  60 + 35 * sin(2 * pi * (week - 3) / 12) +
+  rnorm(24, 0, 10)
+))
+
+previous_rainfall <- c(rainfall[1], rainfall[-24])
+
+cases <- rpois(
+  24,
+  lambda = 15 + 0.3 * previous_rainfall
+)
+
+malaria_data <- data.frame(
+  week = week,
+  rainfall_mm = rainfall,
+  malaria_cases = cases
+)
+
+print(malaria_data)
+
+write.csv(
+  malaria_data,
+  "malaria_data.csv",
+  row.names = FALSE
+)
+```
+
+The generated dataset contains 24 weekly observations.
+
+---
+
+# Working With the Repository
+
+## Clone the repository
+
+The repository can be cloned through RStudio using:
+
+**File → New Project → Version Control → Git**
+
+Alternatively, using the terminal:
+
+```bash
+git clone <repository-url>
+```
+
+Move into the project directory:
+
+```bash
+cd malaria-git-practical
+```
+
+Check the repository status:
+
+```bash
+git status
+```
+
+---
+
+# Collaboration Workflow
+
+Each pair works on a separate feature branch.
+
+The general workflow is:
+
+```text
+main
+  │
+  ├── feature/malaria-trends
+  │
+  ├── feature/rainfall-analysis
+  │
+  ├── feature/risk-classification
+  │
+  └── feature/moving-average
+```
+
+Changes should be made on the appropriate feature branch rather than directly on `main`.
+
+### Create a branch
+
+```bash
+git switch -c <branch-name>
+```
+
+### Check the current branch
+
+```bash
+git branch
+```
+
+### Check changes
+
+```bash
+git status
+```
+
+### Review changes
+
+```bash
+git diff
+```
+
+### Stage changes
+
+```bash
+git add <file>
+```
+
+or:
+
+```bash
+git add .
+```
+
+### Commit changes
+
+```bash
+git commit -m "Describe the change"
+```
+
+### Push a branch to GitHub
+
+```bash
+git push -u origin <branch-name>
+```
+
+After pushing, the branch can be submitted for review through a **Pull Request** on GitHub.
+
+---
+
+# Pair Assignments
+
+There are four analysis tasks.
+
+Each pair should:
+
+1. Work on its assigned branch.
+2. Create the specified R script.
+3. Complete the analysis.
+4. Commit the changes.
+5. Push the branch to GitHub.
+6. Open a Pull Request into `main`.
+7. Include a short description of the analysis and main finding.
+
+---
+
+## Pair 1 — Malaria Case Trends
+
+### Research Question
+
+**How did malaria cases change over the 24-week period?**
+
+### Branch
+
+```text
+feature/malaria-trends
+```
+
+### File
+
+```text
+analysis/pair1_trends.R
+```
+
+### Tasks
+
+1. Load `malaria_data.csv`.
+2. Calculate the total number of malaria cases.
+3. Calculate the average weekly number of cases.
+4. Identify the week with the highest number of cases.
+5. Create a line plot showing malaria cases over time.
+6. Add an appropriate title and axis labels.
+7. Add a short comment describing the main observation.
+
+### Starting point
+
+```r
+data <- read.csv("malaria_data.csv")
+
+total_cases <- sum(data$malaria_cases)
+
+average_cases <- mean(data$malaria_cases)
+
+# Continue the analysis here
+```
+
+### Commit message
+
+```bash
+git commit -m "Add malaria trend analysis"
+```
+
+---
+
+# Pair 2 — Rainfall and Malaria Cases
+
+### Research Question
+
+**What relationship exists between rainfall and malaria cases in the synthetic dataset?**
+
+### Branch
+
+```text
+feature/rainfall-analysis
+```
+
+### File
+
+```text
+analysis/pair2_rainfall.R
+```
+
+### Tasks
+
+1. Load `malaria_data.csv`.
+2. Calculate the average weekly rainfall.
+3. Create a scatterplot of rainfall against malaria cases.
+4. Calculate the correlation between rainfall and malaria cases.
+5. Determine whether the relationship is positive or negative.
+6. As a bonus, investigate the relationship between previous-week rainfall and current-week malaria cases.
+7. Add a short comment describing the main observation.
+
+### Starting point
+
+```r
+data <- read.csv("malaria_data.csv")
+
+average_rainfall <- mean(data$rainfall_mm)
+
+correlation <- cor(
+  data$rainfall_mm,
+  data$malaria_cases
+)
+
+# Continue the analysis here
+```
+
+### Commit message
+
+```bash
+git commit -m "Add rainfall correlation analysis"
+```
+
+---
+
+# Pair 3 — High-Risk Week Classification
+
+### Research Question
+
+**Which weeks should be flagged as having unusually high malaria case counts?**
+
+### Branch
+
+```text
+feature/risk-classification
+```
+
+### File
+
+```text
+analysis/pair3_risk.R
+```
+
+### Tasks
+
+1. Load `malaria_data.csv`.
+2. Create a new variable called `risk_level`.
+3. Classify weeks with **35 or more cases** as `High`.
+4. Classify all other weeks as `Normal`.
+5. Count the number of high-risk weeks.
+6. Identify the weeks classified as high-risk.
+7. Add a short comment describing the results.
+
+### Starting point
+
+```r
+data <- read.csv("malaria_data.csv")
+
+data$risk_level <- ifelse(
+  data$malaria_cases >= 35,
+  "High",
+  "Normal"
+)
+
+# Continue the analysis here
+```
+
+### Commit message
+
+```bash
+git commit -m "Add malaria risk classification"
+```
+
+> **Note:** The threshold of 35 cases is an arbitrary value for this practical. It is not a real malaria surveillance or public-health alert threshold.
+
+---
+
+# Pair 4 — Three-Week Moving Average
+
+### Research Question
+
+**Can smoothing the weekly case counts make the overall trend easier to see?**
+
+### Branch
+
+```text
+feature/moving-average
+```
+
+### File
+
+```text
+analysis/pair4_moving_average.R
+```
+
+### Tasks
+
+1. Load `malaria_data.csv`.
+2. Calculate a three-week moving average of malaria cases.
+3. Add the moving average as a new column.
+4. Plot the original weekly cases.
+5. Add the moving average to the same plot.
+6. Include appropriate labels and a title.
+7. Add a short comment describing what the smoothed trend shows.
+
+### Starting point
+
+```r
+data <- read.csv("malaria_data.csv")
+
+data$moving_avg <- as.numeric(
+  stats::filter(
+    data$malaria_cases,
+    rep(1/3, 3),
+    sides = 1
+  )
+)
+
+# Continue the analysis here
+```
+
+### Commit message
+
+```bash
+git commit -m "Add three-week moving average analysis"
+```
+
+---
+
+# Pull Request Requirements
+
+Each Pull Request should contain:
+
+### Title
+
+A clear description of the contribution.
+
+Example:
+
+```text
+Add malaria trend analysis
+```
+
+### Description
+
+Include:
+
+- What was added
+- Which research question was addressed
+- Main finding
+- Files changed
+
+Example:
+
+```text
+## Summary
+
+Added an analysis of weekly malaria case trends.
+
+## Analysis
+
+- Calculated total and average cases
+- Identified the week with the highest cases
+- Added a weekly case trend plot
+
+## Main finding
+
+The analysis identifies the week with the highest simulated malaria case count.
+```
+
+---
+
+# After Contributions Are Merged
+
+Once the Pull Requests have been merged into `main`, update the local repository:
+
+```bash
+git switch main
+```
+
+Then:
+
+```bash
+git pull origin main
+```
+
+Check the updated project:
+
+```bash
+git status
+```
+
+The final repository should contain all four analyses.
+
+---
+
+# Expected Final Repository
+
+```text
+malaria-git-practical/
+│
+├── README.md
+├── generate_data.R
+├── malaria_data.csv
+│
+└── analysis/
+    ├── pair1_trends.R
+    ├── pair2_rainfall.R
+    ├── pair3_risk.R
+    └── pair4_moving_average.R
+```
+
+---
+
+# Git Workflow Summary
+
+The basic collaborative workflow is:
+
+```text
+Clone
+  ↓
+Create branch
+  ↓
+Make changes
+  ↓
+Check status
+  ↓
+Review changes
+  ↓
+Stage changes
+  ↓
+Commit
+  ↓
+Push
+  ↓
+Pull Request
+  ↓
+Review
+  ↓
+Merge into main
+  ↓
+Pull latest changes
+```
+
+### Core commands
+
+```bash
+git status
+git branch
+git switch -c <branch>
+git add .
+git commit -m "message"
+git push -u origin <branch>
+git switch main
+git pull origin main
+```
+
+---
+
+# Practical Goal
+
+By the end of the exercise, the project should demonstrate how a research team can use Git and GitHub to work collaboratively on an R-based analysis while keeping a clear history of changes.
+
+The emphasis is not only on individual Git commands, but on understanding how those commands fit into a **real collaborative research workflow**.
